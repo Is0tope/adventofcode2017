@@ -1,0 +1,136 @@
+// NOTE: This was an attempt to make a memory efficient algorithm
+//       using a spiral to sum the values. However the edge cases
+//       proved too problematic.
+
+package main
+
+import (
+	"fmt"
+	"math"
+	"os"
+	"strconv"
+	"container/list"
+)
+
+func sumItems(l *list.List,n int) int{
+	acc := 0
+	an := int(math.Abs(float64(n)))
+	cnt := 0
+	if n > 0 {
+		for e := l.Front(); e != nil; e = e.Next() {
+			acc += e.Value.(int)
+			cnt++
+			if cnt > an -1 {
+				break
+			}
+		}
+	} else {
+		for e := l.Back(); e != nil; e = e.Prev() {
+			acc += e.Value.(int)
+			cnt++
+			if cnt > an -1 {
+				break
+			}
+		}
+	}
+	return acc
+}
+func main() {
+	target,err := strconv.Atoi(os.Args[1])
+	if err != nil {
+		fmt.Println("Enter a target number")
+		return
+	}
+	fmt.Printf("TARGET: %d\n",target)
+	// Create the chain
+	chain := list.New()	
+	
+	layer := 2
+	layercnt := 7
+	layersz := 8
+
+	ordinal := 9
+	sidel := 3
+	side := 3
+	sidecnt := 1
+	maxl := 9
+
+	// insert first elements (cheating here as edge cases for level 1 and 2 are a nightmare)
+	chain.PushFront(1)
+	chain.PushFront(1)
+	chain.PushFront(2)
+	chain.PushFront(4)
+	chain.PushFront(5)
+	chain.PushFront(10)
+	chain.PushFront(11)
+	chain.PushFront(23)
+	// goal loop
+	for chain.Front().Value.(int) < target {
+		
+		// LOGIC
+		val := 0
+		// If corner wrap, get last 2, otherwise get 1
+		if layercnt == 1 {
+			val += sumItems(chain,2)
+		}else if layercnt == 0{
+			val += sumItems(chain,1)			
+		}else{
+			if sidecnt == 0 {
+				val += sumItems(chain,2)
+			}else{
+				val += sumItems(chain,1)				
+			}
+		}
+		fmt.Printf("val: %d\n",val)
+
+		// if corner, then only get last value, otherwise get 2
+		if layercnt == 0 {
+			val += sumItems(chain,-1)
+		}else{
+			if sidecnt == sidel - 1 {
+				val += sumItems(chain,-1)
+			}else{
+				val += sumItems(chain,-2)				
+			}
+		}
+		fmt.Printf("val: %d\n",val)
+		
+		chain.PushFront(val)
+		// Log
+		fmt.Printf("ordinal: %d, layer: %d, layercnt: %d, layersz: %d, sidel: %d, side: %d, sidecnt: %d, maxl: %d, val: %d, len: %d\n",ordinal,layer,layercnt,layersz,sidel,side,sidecnt,maxl,val,chain.Len())
+		
+		ordinal++
+		sidecnt++
+		layercnt++
+		if layercnt == layersz {
+			layercnt = 0
+			// such a hack
+			if layer == 1 {
+				layersz += 7
+			}else {
+				layersz += 8
+			}
+			layer++
+			sidel += 2			
+			side = 0
+			sidecnt = 0
+			fmt.Printf("\n")
+		}
+		if sidecnt == sidel -1 {
+			side++
+			sidecnt = 0
+		}
+		// If list exceeds maxl, drop last element
+		if chain.Len() > maxl {
+			e := chain.Back()
+			fmt.Printf("Popping: %d\n",e.Value.(int))
+			chain.Remove(e)
+		}
+		if layer > 2 && sidecnt < 3 && sidecnt > 0{
+			maxl++
+		}
+		if ordinal > 26 {
+			break
+		}
+	}
+}
