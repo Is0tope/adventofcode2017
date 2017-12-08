@@ -1,7 +1,3 @@
-// NOTE: This was an attempt to make a memory efficient algorithm
-//       using a spiral to sum the values. However the edge cases
-//       proved too problematic.
-
 package main
 
 import (
