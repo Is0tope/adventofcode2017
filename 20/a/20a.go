@@ -67,6 +67,9 @@ func main() {
 		if p1am != p2am {
 			return p1am < p2am
 		}
+
+		// This should acctually use dot product of a and v in retrospect
+		// to account for loopback of particle (but it works in this case)
 		p1vm := p1.v.magnitude()
 		p2vm := p2.v.magnitude()
 		if p1vm != p2vm {
